@@ -1,47 +1,85 @@
-<script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
+<template xmlns="http://www.w3.org/1999/html">
+  <div>
+    <h1>hi {{ msg }}</h1>
+    <div @click="add">{{ count }}</div>
+    <input type="text" v-model="val" @keydown.enter="addToDo" />
+    <div>
+      <button @click="addToDo">add</button>
+      <button @click="clearToDo" v-if="doneCount>0">clear</button>
+    </div>
+    <ul>
+      <li v-for="todo in todos">
+        <input type="checkbox" v-model="todo.done">
+        <span>
+          {{ todo.title }}
+        </span>
+      </li>
+    </ul>
+    <div>
+      {{ doneCount }}
+      /
+      {{ todos.length }}
+    </div>
+    <div>
+      <input type="checkbox" v-model="allDone" />selectAll
+    </div>
+  </div>
+</template>
+<script>
+import { defineComponent } from 'vue'
+
+export default defineComponent({
+  data() {
+    return {
+      msg: 'vuejs',
+      count: 1,
+      val: '',
+      todos: [
+        { title: 'learn', done: false },
+        { title: 'talk', done: true }
+      ]
+    }
+  },
+  watch: {
+    todos: {
+      handler() {
+        localStorage.setItem('todos', JSON.stringify(this.todos))
+      },
+      deep: true,
+      immediate: true
+    }
+  },
+  computed: {
+    doneCount() {
+      return this.todos.filter(todo => todo.done).length
+    },
+    allDone: {
+      get() {
+        return this.todos.filter(todo => todo.done).length === this.todos.length
+      },
+      set(value) {
+        this.todos.forEach(v => v.done = value)
+      }
+    }
+  },
+  methods: {
+    add() {
+      this.count++
+    },
+    addToDo() {
+      this.todos.push({
+        title: this.val,
+        done: false
+      })
+      this.val = ''
+    },
+    clearToDo() {
+      this.todos = this.todos.filter(todo => !todo.done)
+    }
+  }
+})
 </script>
 
-<template>
-  <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
+<style>
 
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-    </div>
-  </header>
-
-  <main>
-    <TheWelcome />
-  </main>
-</template>
-
-<style scoped>
-header {
-  line-height: 1.5;
-}
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-}
 </style>
